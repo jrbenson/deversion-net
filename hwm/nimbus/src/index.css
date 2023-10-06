@@ -1,0 +1,29 @@
+body,
+html {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  background-color: #1e3162;
+}
+
+#ui {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.system-label {
+  font-family: 'PT Sans Narrow', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  text-transform: uppercase;
+  text-shadow: 1px 1px 2px #000000;
+}
+
+/* font-family: 'PT Sans Narrow', sans-serif;
+font-family: 'Unbounded', sans-serif; */
