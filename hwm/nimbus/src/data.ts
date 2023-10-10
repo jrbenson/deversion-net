@@ -5,6 +5,11 @@ import { Asteroid, Jovian, Planet, Signal, System } from './system'
 const DATA_URL =
   'https://docs.google.com/spreadsheets/d/1eTCM4KNb7lv7mtFmMx9WVOud2pg7EnqcDP40n9S-5go/gviz/tq?tqx=out:csv&sheet=Systems%201.7'
 
+// Function that creates an array of numbers over a range
+function range(start: number, end: number) {
+  return Array.from({ length: end - start + 1 }, (_, i) => i + start)
+}
+
 // Index of the columns in the CSV data for adjustable lookup
 const COL_TIER_HEADER = 1
 const COL_FACTION = 1
@@ -25,14 +30,14 @@ const COL_SIGNALS = {
   'Traveling Trader': [33, 34, 35],
   Other: [36, 37, 38],
 }
-const COL_ASTEROIDS = [40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52]
+const COL_ASTEROIDS = range(40, 52)
 const COL_JOVIANS = [
   [57, 58, 59],
   [60, 61, 62],
   [63, 64, 65],
   [66, 67, 68],
 ]
-const COL_PLANETS = [71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84]
+const COL_PLANETS = range(71, 84)
 const ROW_START = 4
 
 const GREEK_LETTERS = [
@@ -158,4 +163,49 @@ function parseData(data: string[][]) {
   }
 
   return systems
+}
+
+export function getOresInAsteroids(asteroids: Asteroid[]) {
+  const ores: string[] = []
+  for (let asteroid of asteroids) {
+    if (!ores.includes(asteroid.ore)) {
+      ores.push(asteroid.ore)
+    }
+  }
+  ores.sort()
+  if (ores.includes('M')) {
+    ores.splice(ores.indexOf('M'), 1)
+    ores.unshift('M')
+  }
+  return ores
+}
+
+export function getOresInAsteroidsString(asteroids: Asteroid[]) {
+  return getOresInAsteroids(asteroids).join('')
+}
+
+export function getJovianBands(jovians: Jovian[]) {
+  const tier3s: string[] = []
+  const tier4s: string[] = []
+  const tier5s: string[] = []
+  for (let jovian of jovians) {
+    if (!tier3s.includes(jovian.bands[0])) {
+      tier3s.push(jovian.bands[0])
+    }
+    if (!tier4s.includes(jovian.bands[1])) {
+      tier4s.push(jovian.bands[1])
+    }
+    if (!tier5s.includes(jovian.bands[2])) {
+      tier5s.push(jovian.bands[2])
+    }
+  }
+  tier3s.sort()
+  tier4s.sort()
+  tier5s.sort()
+  return [tier3s, tier4s, tier5s]
+}
+
+export function getJovianBandsString(jovians: Jovian[]) {
+  const tiers = getJovianBands(jovians)
+  return `${tiers[0].join('')} ⸱ ${tiers[1].join('')}`
 }

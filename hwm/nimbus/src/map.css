@@ -1,0 +1,70 @@
+.map-system-name {
+  text-transform: uppercase;
+  text-shadow: 1px 1px 2px #000000;
+  transition: all 0.4s ease-in-out;
+  padding-left: 0.1rem;
+}
+
+.map-system-star {
+  fill: #ffffff;
+  filter: drop-shadow(0px 0px 5px #ffffff);
+}
+
+.map-system-tier-wrapper {
+  display: inline-flex;
+  flex-flow: row nowrap;
+  padding: 0.1rem;
+  background-color: #123d9b;
+  /* height: 1.2rem;
+  width: 2.2rem; */
+}
+
+.map-system-tier {
+  display: inline-block;
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  height: 1rem;
+  aspect-ratio: 1 / 1;
+}
+
+.map-system-level {
+  display: inline-block;
+  text-align: center;
+  vertical-align: middle;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background-color: #00000055;
+  height: 1rem;
+  aspect-ratio: 1 / 1;
+}
+
+.map-system-row {
+  display: inline-flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  gap: 0.1rem;
+}
+
+.map-system-detail {
+  display: inline-flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  font-size: 0.75rem;
+  background-color: #00000055;
+  border-radius: 4px;
+  padding: 0 2px;
+}
+
+.map-system-container {
+  user-select: none;
+  display: flex;
+  flex-flow: column nowrap;
+  margin-top: -0.75rem;
+  transition: all 0.4s ease-in-out;
+}
+
+.map-system-icon {
+  width: 0.75rem;
+  height: 0.95rem;
+}
