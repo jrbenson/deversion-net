@@ -60,17 +60,8 @@ export class SystemList {
         curSelectedId = li.dataset.id.trim()
       }
     }
-    console.log(
-      'LIST is selecting',
-      id,
-      'while currently has selection',
-      curSelectedId,
-      ', this is user action:',
-      userAction
-    )
 
     if (curSelectedId === id && userAction) {
-      console.log('list is deselecting', id)
       this._events.get('select')?.forEach((callback) => {
         callback('__deselect__')
       })

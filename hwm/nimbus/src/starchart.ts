@@ -26,6 +26,10 @@ export class StarChart {
       maxZoom: 10,
       bounds: true,
       boundsPadding: 0.1,
+      onTouch: function (e) {
+        // console.log(e)
+        return false
+      },
     })
 
     const listElem = document.querySelector('#list') as HTMLElement
@@ -33,6 +37,12 @@ export class StarChart {
       this.panzoom.pause()
     })
     listElem.addEventListener('mouseout', () => {
+      this.panzoom.resume()
+    })
+    listElem.addEventListener('touchstart', () => {
+      this.panzoom.pause()
+    })
+    listElem.addEventListener('touchend', () => {
       this.panzoom.resume()
     })
 
@@ -108,7 +118,6 @@ export class StarChart {
 
     this.element.querySelectorAll('.header-wrapper').forEach((elem) => {
       elem.addEventListener('click', (e) => {
-        console.log('MAP clicked', e)
         const target = e.target as HTMLElement
         const id = target.closest('div')?.dataset.id
         if (id) {
@@ -128,15 +137,6 @@ export class StarChart {
         curSelectedId = curSelectedDiv.dataset.id
       }
     }
-
-    console.log(
-      'MAP is selecting',
-      id,
-      'while currently has selection',
-      curSelectedId,
-      ', this is user action:',
-      userAction
-    )
 
     if (curSelectedId === id && userAction) {
       this._events.get('select')?.forEach((callback) => {
@@ -326,12 +326,6 @@ class Star {
 
     html.appendChild(this.containerElem)
 
-    if (this.nameElem) {
-      this.nameElem.addEventListener('click', () => {
-        console.log(this.data.name)
-      })
-    }
-
     this.svgMainGroup.appendChild(html)
   }
 
@@ -353,7 +347,6 @@ class Star {
   }
 
   handleZoom(scale: number) {
-    console.log(this.containerElem)
     this.containerElem?.classList.remove('lod-1', 'lod-2', 'lod-3', 'lod-4')
     if (scale > 2) {
       this.containerElem?.classList.add('lod-1')

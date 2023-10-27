@@ -178,6 +178,7 @@ font-family: 'Jura', sans-serif; */
 
 #btn-list {
   fill: #ffffff;
+  cursor: pointer;
 }
 
 #btn-list:hover {
