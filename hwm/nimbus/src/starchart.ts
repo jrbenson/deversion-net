@@ -243,7 +243,7 @@ class Star {
     connector.setAttribute('y1', `${CONNECT_OFFSET.y}`)
     connector.setAttribute('x2', '0')
     connector.setAttribute('y2', `${-STAR_RADIUS / 2}`)
-    connector.setAttribute('stroke', '#ffffff')
+    connector.setAttribute('stroke', '#ffffff66')
     connector.setAttribute('stroke-width', '0.5')
     this.svgMainGroup.appendChild(connector)
 

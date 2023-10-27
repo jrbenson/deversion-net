@@ -1,6 +1,11 @@
-import { getOreLevelRangeString, getJovianBandsHTML } from './data'
+import { getOreLevelRangeHTML, getJovianBandsHTML } from './data'
 import { System } from './system'
 import { numberToRomanNumeral } from './utils'
+
+import iconJovian from '../ico-jovian.svg'
+import iconMining from '../ico-mining.svg'
+import iconStation from '../ico-station.svg'
+import iconBlank from '../ico-blank.svg'
 
 export class SystemList {
   element: HTMLElement
@@ -94,11 +99,20 @@ export class SystemList {
   }
 
   getListItemHTML(system: System) {
+    const stationIndicatorHTML = system.station
+      ? `<img class="icon" src="${iconStation}"/>`
+      : `<img class="icon" src="${iconBlank}"/>`
+    const asteroidIndicatorHTML =
+      system.asteroids.length > 0 ? `<img class="icon" src="${iconMining}"/>` : `<img class="icon" src="${iconBlank}"/>`
+    const jovianIndicatorHTML =
+      system.jovians.length > 0 ? `<img class="icon" src="${iconJovian}"/>` : `<img class="icon" src="${iconBlank}"/>`
+
     let html = `
       <li data-id="${system.name}">
         <div class="header">
           <span class="name">${system.name}</span>
           <span class="summary">
+          ${asteroidIndicatorHTML}${jovianIndicatorHTML}${stationIndicatorHTML}
             <span class="tier-wrapper">
               <span class="tier">${numberToRomanNumeral(system.tier)}</span>
               <span class="level">${system.level}</span>
@@ -119,7 +133,9 @@ export class SystemList {
   getAsteroidHTML(system: System) {
     let html = ''
     if (system.asteroids.length > 0) {
-      html += `<div>${getOreLevelRangeString(system.asteroids)}</div>`
+      html += `<div class="detail-row"><img class="icon" src="${iconMining}"/>&nbsp;${getOreLevelRangeHTML(
+        system.asteroids
+      )}</div>`
     }
     return html
   }
@@ -135,7 +151,10 @@ export class SystemList {
   getJovianHTML(system: System) {
     let html = ''
     if (system.jovians.length > 0) {
-      html += `<div>${getJovianBandsHTML(system.jovians, 3)}</div>`
+      html += `<div class="detail-row"><img class="icon" src="${iconJovian}"/>&nbsp;${getJovianBandsHTML(
+        system.jovians,
+        3
+      )}</div>`
     }
     return html
   }

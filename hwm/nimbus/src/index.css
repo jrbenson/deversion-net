@@ -159,6 +159,17 @@ font-family: 'Jura', sans-serif; */
   display: none;
 }
 
+#list .name,
+#list .summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+#list .header .icon {
+  width: 0.9rem;
+}
+
 #list .header .tier-wrapper {
   font-family: 'PT Sans Narrow', sans-serif;
   font-size: 0.9rem;
@@ -184,6 +195,21 @@ font-family: 'Jura', sans-serif; */
   vertical-align: middle;
   font-weight: 700;
   background-color: #00000055;
+  height: 1.2rem;
+  aspect-ratio: 1 / 1;
+}
+
+#list .detail-row {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 0.1rem;
+  padding: 0.2rem 0rem;
+}
+
+#list .icon {
+  display: inline-block;
+  width: 1.2rem;
   height: 1.2rem;
   aspect-ratio: 1 / 1;
 }

@@ -184,7 +184,7 @@ export function getOresInAsteroidsString(asteroids: Asteroid[]) {
   return getOresInAsteroids(asteroids).join('')
 }
 
-export function getOreLevelRangeString(asteroids: Asteroid[]) {
+export function getOreLevelRangeHTML(asteroids: Asteroid[]) {
   let oreString = ''
   const ores = getOresInAsteroids(asteroids)
   const ranges = new Map<string, { min: number; max: number }>()
@@ -206,7 +206,7 @@ export function getOreLevelRangeString(asteroids: Asteroid[]) {
   let firstOre = true
   for (let ore of ores) {
     if (!firstOre) {
-      oreString += '&nbsp;&nbsp;&nbsp;'
+      oreString += '&nbsp;&nbsp;'
     }
     oreString += ore
     const range = ranges.get(ore)
