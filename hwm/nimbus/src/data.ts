@@ -184,6 +184,44 @@ export function getOresInAsteroidsString(asteroids: Asteroid[]) {
   return getOresInAsteroids(asteroids).join('')
 }
 
+export function getOreLevelRangeString(asteroids: Asteroid[]) {
+  let oreString = ''
+  const ores = getOresInAsteroids(asteroids)
+  const ranges = new Map<string, { min: number; max: number }>()
+  for (let asteroid of asteroids) {
+    if (!ranges.has(asteroid.ore)) {
+      ranges.set(asteroid.ore, { min: asteroid.level, max: asteroid.level })
+    } else {
+      const range = ranges.get(asteroid.ore)
+      if (range) {
+        if (range.min > asteroid.level) {
+          range.min = asteroid.level
+        }
+        if (range.max < asteroid.level) {
+          range.max = asteroid.level
+        }
+      }
+    }
+  }
+  let firstOre = true
+  for (let ore of ores) {
+    if (!firstOre) {
+      oreString += '&nbsp;&nbsp;&nbsp;'
+    }
+    oreString += ore
+    const range = ranges.get(ore)
+    if (range) {
+      if (range.min == range.max) {
+        oreString += ` <span class="subtle">${range.min}</span>`
+      } else {
+        oreString += ` <span class="subtle">${range.min}-${range.max}</span>`
+      }
+    }
+    firstOre = false
+  }
+  return oreString
+}
+
 export function getJovianBands(jovians: Jovian[]) {
   const tier3s: string[] = []
   const tier4s: string[] = []
@@ -205,7 +243,14 @@ export function getJovianBands(jovians: Jovian[]) {
   return [tier3s, tier4s, tier5s]
 }
 
-export function getJovianBandsString(jovians: Jovian[]) {
+export function getJovianBandsHTML(jovians: Jovian[], maxTier = 2) {
   const tiers = getJovianBands(jovians)
-  return `${tiers[0].join('')} ⸱ ${tiers[1].join('')}`
+  let html = ''
+  for (let tier = 0; tier < maxTier; tier++) {
+    html += `${tiers[tier].join('')}`
+    if (tier < maxTier - 1) {
+      html += ` <span class="subtle">⸱</span> `
+    }
+  }
+  return html
 }

@@ -1,6 +1,6 @@
 import createPanZoom, { PanZoom } from 'panzoom'
 import { System } from './system'
-import { getData, getJovianBandsString, getOresInAsteroids } from './data'
+import { getJovianBandsHTML, getOresInAsteroids } from './data'
 import { newSVG } from './svg'
 
 import { numberToRomanNumeral } from './utils'
@@ -13,17 +13,27 @@ import iconStation from '../ico-station.svg'
 export class StarChart {
   element: HTMLElement
   panzoom: PanZoom
-  stars: Star[] = []
+  stars: Map<string, Star> = new Map()
   staticElements: SVGElement[] = []
 
-  constructor(element: HTMLElement) {
+  _events: Map<string, Function[]> = new Map()
+
+  constructor(element: HTMLElement, data: Map<string, System>) {
     this.element = element
 
     this.panzoom = createPanZoom(this.element, {
       minZoom: 1,
       maxZoom: 10,
       bounds: true,
-      boundsPadding: 0.2,
+      boundsPadding: 0.1,
+    })
+
+    const listElem = document.querySelector('#list') as HTMLElement
+    listElem.addEventListener('mouseover', () => {
+      this.panzoom.pause()
+    })
+    listElem.addEventListener('mouseout', () => {
+      this.panzoom.resume()
     })
 
     window.fetch(mapSVG).then((res) => {
@@ -32,22 +42,46 @@ export class StarChart {
 
         const svg = this.element.querySelector('svg') as SVGSVGElement
         let y = window.innerHeight / 2 - svg.clientHeight / 2
+
         this.panzoom.moveTo(0, y)
 
-        getData().then((data) => {
-          this.update(data)
-          for (let star of this.stars) {
-            star.handleZoom(this.panzoom.getTransform().scale)
-          }
-          this.panzoom.on('transform', (e) => {
-            const zoom = Number(this.element.style.transform.split(',')[0].split('(')[1])
-            for (let star of this.stars) {
-              star.handleZoom(zoom)
-            }
-          })
+        this.update(data)
+        this.handleZoom()
+        this.panzoom.on('zoom', (e) => {
+          this.handleZoom()
         })
+        window.onresize = () => {
+          this.handleZoom()
+        }
       })
     })
+  }
+
+  on(event: string, callback: Function) {
+    if (!this._events.has(event)) {
+      this._events.set(event, [])
+    }
+    this._events.get(event)?.push(callback)
+  }
+
+  off(event: string, callback: Function) {
+    if (this._events.has(event)) {
+      const callbacks = this._events.get(event)
+      if (callbacks) {
+        const index = callbacks.indexOf(callback)
+        if (index > -1) {
+          callbacks.splice(index, 1)
+        }
+      }
+    }
+  }
+
+  handleZoom() {
+    const interactiveZoom = this.panzoom.getTransform().scale //Number(this.element.style.transform.split(',')[0].split('(')[1])
+    const resizeZoom = window.innerWidth / (32 * 40)
+    for (let star of this.stars.values()) {
+      star.handleZoom(interactiveZoom * resizeZoom)
+    }
   }
 
   update(data: Map<string, System>) {
@@ -59,17 +93,99 @@ export class StarChart {
       }
       const marker = this.element.querySelector(`#${name.replace(/ /g, '_')}`) as SVGCircleElement
       if (marker) {
-        this.stars.push(new Star(system, svg, marker.cx.baseVal.value, marker.cy.baseVal.value))
+        this.stars.set(name, new Star(system, svg, marker.cx.baseVal.value, marker.cy.baseVal.value))
         marker.remove()
       }
     }
-    this.stars
+    let starList = Array.from(this.stars.values())
+    starList
       .sort((a, b) => {
         return a.y - b.y
       })
       .forEach((star) => {
         star.addSVG()
       })
+
+    this.element.querySelectorAll('.header-wrapper').forEach((elem) => {
+      elem.addEventListener('click', (e) => {
+        console.log('MAP clicked', e)
+        const target = e.target as HTMLElement
+        const id = target.closest('div')?.dataset.id
+        if (id) {
+          this.setSelected(id)
+        }
+      })
+    })
+  }
+
+  setSelected(id: string, userAction = true) {
+    const curSelectedDiv = this.element.querySelector('div.selected') as HTMLElement
+    let curSelectedId = ''
+    if (curSelectedDiv) {
+      curSelectedDiv.classList.remove('selected')
+      this.stars.get(id)?.returnToOriginalPosition()
+      if (curSelectedDiv.dataset.id) {
+        curSelectedId = curSelectedDiv.dataset.id
+      }
+    }
+
+    console.log(
+      'MAP is selecting',
+      id,
+      'while currently has selection',
+      curSelectedId,
+      ', this is user action:',
+      userAction
+    )
+
+    if (curSelectedId === id && userAction) {
+      this._events.get('select')?.forEach((callback) => {
+        callback('__deselect__', false)
+      })
+      return
+    }
+
+    if (id && id !== '__deselect__') {
+      const item = this.element.querySelector(`div[data-id="${id}"]`) as HTMLElement
+      if (item) {
+        item.classList.add('selected')
+        this.stars.get(id)?.moveToFront()
+        const selectedStar = this.stars.get(id)
+        if (selectedStar && !userAction) {
+          const list = document.querySelector('#list') as HTMLElement
+          const listWidth = list.clientWidth
+
+          const curTransform = this.panzoom.getTransform()
+          const curScale = curTransform.scale
+          const winMidY = window.innerHeight / 2
+          const winMidX = window.innerWidth / 2
+          const svg = this.element.querySelector('svg') as SVGSVGElement
+          const svgMidY = svg.clientHeight / 2
+          const svgMidX = svg.clientWidth / 2
+          const svgViewBox = svg.viewBox.baseVal
+          const svgScale = svgViewBox.width / svg.clientWidth
+          const verticalCenterOffset = window.innerHeight / 2 - svg.clientHeight / 2
+
+          const targetX = svgMidX - selectedStar.x * (1 / svgScale) - listWidth / 2
+          const targetY = svgMidY - selectedStar.y * (1 / svgScale) + verticalCenterOffset
+
+          // console.log('target', targetX, targetY)
+          // console.log('svgmid', svgMidX, svgMidY)
+          // console.log('svgScale', svgScale)
+          // console.log('starcoord', selectedStar.x, selectedStar.y)
+          // console.log('offeset', verticalCenterOffset)
+
+          this.panzoom.zoomAbs(winMidX, winMidY, 1)
+          this.panzoom.smoothMoveTo(targetX, targetY)
+          // this.panzoom.zoomAbs(winMidX, winMidY, curScale)
+        }
+      }
+      if (userAction) {
+        this._events.get('select')?.forEach((callback) => {
+          callback(id, false)
+        })
+      }
+    }
   }
 }
 
@@ -85,6 +201,8 @@ class Star {
   nameElem: HTMLSpanElement | null = null
   detailsElem: HTMLSpanElement | null = null
 
+  _nextSibling: SVGElement | null = null
+
   constructor(data: System, svg: SVGSVGElement, x: number, y: number) {
     this.data = data
     this.svg = svg
@@ -94,7 +212,7 @@ class Star {
   }
 
   createSVG() {
-    const CONNECT_OFFSET = { x: 0, y: -32 }
+    const CONNECT_OFFSET = { x: 0, y: -26 }
     const PADDING = 4
     const STAR_RADIUS = 5
     const BASE_FONT_SIZE = 20
@@ -107,7 +225,7 @@ class Star {
     star.setAttribute('cy', `${CONNECT_OFFSET.y}`)
     star.setAttribute('r', `${STAR_RADIUS}`)
     star.setAttribute('fill', '#ffffff')
-    star.classList.add('map-system-star')
+    star.classList.add('star')
     this.svgMainGroup.appendChild(star)
 
     const newMarker = newSVG('circle')
@@ -134,51 +252,56 @@ class Star {
     html.style.overflow = 'visible'
 
     this.containerElem = document.createElement('div')
-    this.containerElem.classList.add('map-system-container')
+    this.containerElem.classList.add('container')
+    this.containerElem.dataset.id = this.data.name
 
     const header = document.createElement('span')
-    header.classList.add('map-system-row')
+    header.classList.add('row')
+
+    const headerWrapper = document.createElement('span')
+    headerWrapper.classList.add('header-wrapper')
 
     const tierWrapper = document.createElement('span')
-    tierWrapper.classList.add('map-system-tier-wrapper')
+    tierWrapper.classList.add('tier-wrapper')
 
     const tier = document.createElement('span')
-    tier.classList.add('map-system-tier')
+    tier.classList.add('tier')
     tier.innerHTML = numberToRomanNumeral(this.data.tier)
 
     const level = document.createElement('span')
-    level.classList.add('map-system-level')
+    level.classList.add('level')
     level.innerHTML = String(this.data.level)
 
     this.nameElem = document.createElement('span')
-    this.nameElem.classList.add('map-system-name')
+    this.nameElem.classList.add('name')
     this.nameElem.innerHTML = this.data.name
 
     this.containerElem.appendChild(header)
-    header.appendChild(tierWrapper)
+    header.appendChild(headerWrapper)
+    headerWrapper.appendChild(tierWrapper)
     tierWrapper.appendChild(tier)
     tierWrapper.appendChild(level)
-    header.appendChild(this.nameElem)
+    headerWrapper.appendChild(this.nameElem)
 
     this.detailsElem = document.createElement('span')
-    this.detailsElem.classList.add('map-system-row', 'map-system-detail-row')
+    this.detailsElem.classList.add('row', 'detail-row')
 
     if (this.data.station) {
       const station = document.createElement('span')
-      station.classList.add('map-system-detail')
+      station.classList.add('detail')
       const stationIcon = document.createElement('img')
       stationIcon.src = iconStation
-      stationIcon.classList.add('map-system-icon')
+      stationIcon.classList.add('icon')
       station.appendChild(stationIcon)
       this.detailsElem.appendChild(station)
     }
 
     if (this.data.asteroids.length > 0) {
       const mining = document.createElement('span')
-      mining.classList.add('map-system-detail')
+      mining.classList.add('detail')
       const miningIcon = document.createElement('img')
       miningIcon.src = iconMining
-      miningIcon.classList.add('map-system-icon')
+      miningIcon.classList.add('icon')
       const miningDetails = document.createElement('span')
       miningDetails.innerHTML = `${getOresInAsteroids(this.data.asteroids).join('')}`
       mining.appendChild(miningIcon)
@@ -188,12 +311,12 @@ class Star {
 
     if (this.data.jovians.length > 0) {
       const jovian = document.createElement('span')
-      jovian.classList.add('map-system-detail')
+      jovian.classList.add('detail')
       const jovianIcon = document.createElement('img')
       jovianIcon.src = iconJovian
-      jovianIcon.classList.add('map-system-icon')
+      jovianIcon.classList.add('icon')
       const jovianDetails = document.createElement('span')
-      jovianDetails.innerHTML = getJovianBandsString(this.data.jovians)
+      jovianDetails.innerHTML = getJovianBandsHTML(this.data.jovians)
       jovian.appendChild(jovianIcon)
       jovian.appendChild(jovianDetails)
       this.detailsElem.appendChild(jovian)
@@ -214,29 +337,32 @@ class Star {
 
   addSVG() {
     this.svg.appendChild(this.svgMainGroup)
+    this._nextSibling = this.svgMainGroup.nextSibling as SVGElement
+  }
+
+  moveToFront() {
+    this.svg.appendChild(this.svgMainGroup)
+  }
+
+  returnToOriginalPosition() {
+    if (this._nextSibling) {
+      this.svg.insertBefore(this.svgMainGroup, this._nextSibling)
+    } else {
+      this.svg.appendChild(this.svgMainGroup)
+    }
   }
 
   handleZoom(scale: number) {
+    console.log(this.containerElem)
+    this.containerElem?.classList.remove('lod-1', 'lod-2', 'lod-3', 'lod-4')
     if (scale > 2) {
-      if (this.nameElem) {
-        this.nameElem.style.opacity = '1'
-      }
-      if (this.detailsElem) {
-        this.detailsElem.style.opacity = '1'
-      }
-      if (this.containerElem) {
-        this.containerElem.style.marginLeft = '0'
-      }
+      this.containerElem?.classList.add('lod-1')
+    } else if (scale > 1.5) {
+      this.containerElem?.classList.add('lod-2')
+    } else if (scale > 0.8) {
+      this.containerElem?.classList.add('lod-3')
     } else {
-      if (this.nameElem) {
-        this.nameElem.style.opacity = '0'
-      }
-      if (this.detailsElem) {
-        this.detailsElem.style.opacity = '0'
-      }
-      if (this.containerElem) {
-        this.containerElem.style.marginLeft = '-1.5rem'
-      }
+      this.containerElem?.classList.add('lod-4')
     }
     if (this.svgMainGroup) {
       let transform = this.svgMainGroup.getAttribute('transform')
@@ -246,7 +372,6 @@ class Star {
         } else {
           transform += ` scale(${1 / scale})`
         }
-        console.log(transform)
         this.svgMainGroup.setAttribute('transform', transform)
       }
     }

@@ -6,16 +6,29 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=PT+Sans+Narrow:wght@400;700&family=Unbounded:wght@200;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Jura:wght@300;500&family=PT+Sans+Narrow:wght@400;700&display=swap"
       rel="stylesheet"
     />
-    <title>Homeworld Mobile</title>
+    <title>Nimbus Star Chart</title>
   </head>
   <body>
     <div id="map"></div>
-    <!-- <div id="ui">
-      <p>UI</p>
-    </div> -->
+    <div id="ui">
+      <div id="top">
+        <span class="toolbar">(filters)</span>
+        <h1>Nimbus</h1>
+        <span class="toolbar">
+          <a id="btn-list"
+            ><svg viewBox="0 0 32 32" width="32" height="32">
+              <rect x="4" y="5" width="24" height="6" />
+              <rect x="4" y="13" width="24" height="6" />
+              <rect x="4" y="21" width="24" height="6" />
+            </svg>
+          </a>
+        </span>
+      </div>
+      <div id="list"></div>
+    </div>
     <script type="module" src="src/index.ts"></script>
   </body>
 </html>
