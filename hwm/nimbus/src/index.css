@@ -19,6 +19,16 @@ html {
   background-color: #1e3162;
 }
 
+body {
+  background-image: url('../starfield.jpg');
+  background-size: cover;
+}
+
+#ui {
+  background-image: url('../texture-stripes.png');
+  background-repeat: repeat;
+}
+
 #map,
 #list {
   user-select: none;

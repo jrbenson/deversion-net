@@ -39,6 +39,9 @@ export class StarChart {
     listElem.addEventListener('mouseout', () => {
       this.panzoom.resume()
     })
+    // listElem.addEventListener('mousewheel', () => {
+    //   this.panzoom.pause()
+    // })
     listElem.addEventListener('touchstart', () => {
       this.panzoom.pause()
     })
