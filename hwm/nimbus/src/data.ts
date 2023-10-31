@@ -5,9 +5,13 @@ import { Asteroid, Jovian, Planet, Signal, System } from './system'
 const DATA_URL =
   'https://docs.google.com/spreadsheets/d/1eTCM4KNb7lv7mtFmMx9WVOud2pg7EnqcDP40n9S-5go/gviz/tq?tqx=out:csv&sheet=Systems%201.7'
 
-// Function that creates an array of numbers over a range
-function range(start: number, end: number) {
-  return Array.from({ length: end - start + 1 }, (_, i) => i + start)
+// Function that creates an inclusive array of numbers over a range with an increment
+function range(start: number, end: number, increment = 1) {
+  return Array.from({ length: Math.floor((end - start) / increment) + 1 }, (_, i) => i * increment + start)
+}
+
+function rangeCount(start: number, count: number, increment = 1) {
+  return range(start, start + (count - 1) * increment, increment)
 }
 
 // Index of the columns in the CSV data for adjustable lookup
@@ -18,27 +22,26 @@ const COL_LEVEL = 3
 const COL_STATION = 4
 const COL_SIGNAL_TOTAL = 5
 const COL_SIGNALS = {
-  'Cangacian Signal': [6, 7, 8],
-  'Tanoch Signal': [9, 10, 11],
-  'Yaot Signal': [12, 13, 14],
-  'Amassari Signal': [15, 16, 17],
-  'Kiithless Signal': [18, 19, 20],
-  'Relic Recovery': [21, 22, 23],
-  'Progenitor Signal': [24, 25, 26],
-  'Progenitor Activities': [27, 28, 29],
-  'Distress Call': [30, 31, 32],
-  'Traveling Trader': [33, 34, 35],
-  Other: [36, 37, 38],
+  'Cangacian Signal': rangeCount(6, 3, 2),
+  'Tanoch Signal': rangeCount(12, 3, 2),
+  'Yaot Signal': rangeCount(18, 3, 2),
+  'Amassari Signal': rangeCount(24, 3, 2),
+  'Kiithless Signal': rangeCount(30, 3, 2),
+  'Relic Recovery': rangeCount(36, 3, 2),
+  'Progenitor Signal': rangeCount(42, 3, 2),
+  'Progenitor Activities': rangeCount(48, 3, 2),
+  'Distress Call': rangeCount(54, 3, 2),
+  'Traveling Trader': rangeCount(60, 3, 2),
+  'Mining Ops': rangeCount(66, 3, 2),
+  Other: rangeCount(72, 3, 2),
 }
-const COL_ASTEROIDS = range(40, 52)
-const COL_JOVIANS = [
-  [57, 58, 59],
-  [60, 61, 62],
-  [63, 64, 65],
-  [66, 67, 68],
-]
-const COL_PLANETS = range(71, 84)
-const ROW_START = 4
+const COL_ASTEROIDS = range(79, 91)
+const COL_HIDDEN_LENGTH = 3
+const COL_JOVIANS = [rangeCount(96, 3, 1), rangeCount(99, 3, 1), rangeCount(102, 3, 1), rangeCount(105, 3, 1)]
+const COL_PLANETS = range(110, 123)
+
+const ROW_START = 5 - 1
+const ROW_END = 180 - 1
 
 const GREEK_LETTERS = [
   'Alpha',
@@ -74,7 +77,7 @@ export async function getData() {
 }
 
 function parseData(data: string[][]) {
-  data = data.slice(ROW_START)
+  data = data.slice(ROW_START, ROW_END)
 
   const systems: Map<string, System> = new Map()
 
@@ -161,6 +164,9 @@ function parseData(data: string[][]) {
       }
     }
   }
+
+  console.log(data)
+  console.log(systems)
 
   return systems
 }
