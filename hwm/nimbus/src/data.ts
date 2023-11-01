@@ -1,5 +1,5 @@
 import { parse } from 'papaparse'
-import { Asteroid, Jovian, Planet, Signal, System } from './system'
+import { Asteroid, Jovian, Planet, Signal, System, EnemyShip } from './system'
 
 // URL for retrieving the CSV data from Google Sheets
 const DATA_URL =
@@ -104,16 +104,27 @@ function parseData(data: string[][]) {
       for (let [type, scans] of Object.entries(COL_SIGNALS)) {
         for (let scanIndex = 0; scanIndex < scans.length; scanIndex++) {
           const count = Number(row[scans[scanIndex]])
+          if (count === 0) continue
+          const details = parseSignalDetails(row[scans[scanIndex] + 1])
           for (let sigIndex = 0; sigIndex < count; sigIndex++) {
             let name = `${type}`
             if (count > 1) {
               name += ` ${GREEK_LETTERS[sigIndex]}`
             }
+            let level = system.level
+            if (sigIndex < details.levels.length) {
+              level = details.levels[sigIndex]
+            }
+            let rarity = 'common'
+            if (sigIndex < details.rarities.length) {
+              rarity = details.rarities[sigIndex]
+            }
             const signal: Signal = {
               name: name,
               type: type,
               scan: scanIndex + 1,
-              level: system.level,
+              level: level,
+              rarity: rarity,
             }
             system.signals.push(signal)
           }
@@ -165,10 +176,50 @@ function parseData(data: string[][]) {
     }
   }
 
-  console.log(data)
-  console.log(systems)
+  // console.log(data)
+  // console.log(systems)
 
   return systems
+}
+
+export interface SignalDetails {
+  levels: number[]
+  rarities: string[]
+  enemy?: string[]
+  ally?: string[]
+  enemyWaves?: EnemyShip[][]
+}
+
+function parseRarity(text: string): string {
+  let rarity = 'common'
+  if (text.includes('U')) {
+    rarity = 'uncommon'
+  } else if (text.includes('R')) {
+    rarity = 'rare'
+  } else if (text.includes('E')) {
+    rarity = 'epic'
+  } else if (text.includes('L')) {
+    rarity = 'legendary'
+  }
+  return rarity
+}
+
+function parseLevel(text: string): number {
+  return Number(text.replace(/\D/g, ''))
+}
+
+function parseSignalDetails(details: string): SignalDetails {
+  const splitText = details.split(',')
+  const levels = []
+  const rarities = []
+  for (let text of splitText) {
+    levels.push(parseLevel(text))
+    rarities.push(parseRarity(text))
+  }
+  return {
+    levels: levels,
+    rarities: rarities,
+  }
 }
 
 export function getOresInAsteroids(asteroids: Asteroid[]) {

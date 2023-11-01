@@ -1,5 +1,10 @@
 :root {
   --selected-color: #f06122;
+  --common-color: #123d9b;
+  --uncommon-color: #3979aa;
+  --epic-color: #7030a0;
+  --rare-color: #70ad47;
+  --legendary-color: #ad8329;
 }
 
 html {
@@ -154,6 +159,19 @@ font-family: 'Jura', sans-serif; */
   justify-content: space-between;
 }
 
+#list .signals {
+  display: flex;
+  flex-flow: column nowrap;
+  gap: 0.2rem;
+}
+
+#list .sig-header {
+  display: flex;
+  flex-flow: row nowrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
 #list .details {
   padding: 0rem 0.5rem 0.5rem 1rem;
   display: none;
@@ -171,8 +189,6 @@ font-family: 'Jura', sans-serif; */
 }
 
 #list .header .tier-wrapper {
-  font-family: 'PT Sans Narrow', sans-serif;
-  font-size: 0.9rem;
   display: inline-flex;
   flex-flow: row nowrap;
   padding: 0.1rem;
@@ -181,7 +197,9 @@ font-family: 'Jura', sans-serif; */
   width: 2.2rem; */
 }
 
-#list .header .tier {
+#list .tier {
+  font-family: 'PT Sans Narrow', sans-serif;
+  font-size: 0.9rem;
   display: inline-block;
   text-align: center;
   font-weight: 700;
@@ -189,7 +207,9 @@ font-family: 'Jura', sans-serif; */
   aspect-ratio: 1 / 1;
 }
 
-#list .header .level {
+#list .level {
+  font-family: 'PT Sans Narrow', sans-serif;
+  font-size: 0.9rem;
   display: inline-block;
   text-align: center;
   vertical-align: middle;
@@ -197,6 +217,36 @@ font-family: 'Jura', sans-serif; */
   background-color: #00000055;
   height: 1.2rem;
   aspect-ratio: 1 / 1;
+}
+
+#list .signal .level {
+  font-size: 0.75rem;
+  height: 1rem;
+}
+
+#list .level.common,
+#list .tier.common {
+  background-color: var(--common-color);
+}
+
+#list level.uncommon,
+#list .tier.uncommon {
+  background-color: var(--uncommon-color);
+}
+
+#list .level.rare,
+#list .tier.rare {
+  background-color: var(--rare-color);
+}
+
+#list .level.epic,
+#list .tier.epic {
+  background-color: var(--epic-color);
+}
+
+#list .level.legendary,
+#list .tier.legendary {
+  background-color: var(--legendary-color);
 }
 
 #list .detail-row {

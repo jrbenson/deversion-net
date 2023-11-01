@@ -123,7 +123,9 @@ export class SystemList {
           ${this.getAsteroidHTML(system)}
           ${this.getJovianHTML(system)}
           ${system.asteroids.length > 0 || system.jovians.length > 0 ? '<hr>' : ''}
+          <div class="signals">
           ${this.getSignalHTML(system)}
+          </div>
         </div>
       </li>
     `
@@ -143,7 +145,7 @@ export class SystemList {
   getSignalHTML(system: System) {
     let html = ''
     for (let signal of system.signals) {
-      html += `<div class="signal">${signal.name}</div>`
+      html += `<div class="signal"><div class="sig-header"><span class="level ${signal.rarity}">${signal.level}</span>${signal.name}</div><div class="sig-details"></div></div>`
     }
     return html
   }

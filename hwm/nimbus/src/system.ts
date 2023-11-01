@@ -1,8 +1,19 @@
+export interface EnemyShip {
+  count: number
+  faction: string
+  class: string
+  name: string
+}
+
 export interface Signal {
   name: string
   type: string
   scan: number
   level: number
+  rarity: string
+  enemy?: string
+  ally?: string
+  waves?: EnemyShip[][]
 }
 
 export interface Asteroid {

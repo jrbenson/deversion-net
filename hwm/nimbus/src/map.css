@@ -43,7 +43,7 @@
 }
 #map .lod-4:not(.selected) .tier {
   font-size: 0.5rem;
-  height: 0.75rem;
+  height: 0.7rem;
 }
 
 #map .level {
