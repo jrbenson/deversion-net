@@ -4,6 +4,7 @@ import { Asteroid, Jovian, Planet, Signal, System, EnemyShip } from './system'
 // URL for retrieving the CSV data from Google Sheets
 const DATA_URL =
   'https://docs.google.com/spreadsheets/d/1eTCM4KNb7lv7mtFmMx9WVOud2pg7EnqcDP40n9S-5go/gviz/tq?tqx=out:csv&sheet=Systems%201.7'
+const LOCAL_DATA_URL = '/hwm/nimbus/data.csv'
 
 // Function that creates an inclusive array of numbers over a range with an increment
 function range(start: number, end: number, increment = 1) {
@@ -41,7 +42,7 @@ const COL_JOVIANS = [rangeCount(96, 3, 1), rangeCount(99, 3, 1), rangeCount(102,
 const COL_PLANETS = range(110, 123)
 
 const ROW_START = 5 - 1
-const ROW_END = 180 - 1
+const ROW_END = 180
 
 const GREEK_LETTERS = [
   'Alpha',
@@ -70,10 +71,16 @@ const GREEK_LETTERS = [
   'Omega',
 ]
 
-export async function getData() {
-  const response = await window.fetch(DATA_URL)
-  const data = (await response.text().then((text) => parse(text).data)) as string[][]
-  return parseData(data)
+export async function getData(local = false) {
+  if (local) {
+    const response = await window.fetch(LOCAL_DATA_URL)
+    const data = (await response.text().then((text) => parse(text).data)) as string[][]
+    return parseData(data)
+  } else {
+    const response = await window.fetch(DATA_URL)
+    const data = (await response.text().then((text) => parse(text).data)) as string[][]
+    return parseData(data)
+  }
 }
 
 function parseData(data: string[][]) {
@@ -101,16 +108,15 @@ function parseData(data: string[][]) {
         jovians: [],
         planets: [],
       }
+      systems.set(system.name, system)
+
       for (let [type, scans] of Object.entries(COL_SIGNALS)) {
-        for (let scanIndex = 0; scanIndex < scans.length; scanIndex++) {
-          const count = Number(row[scans[scanIndex]])
-          if (count === 0) continue
+        for (let scanIndex = 0; scanIndex < scans.length; scanIndex += 1) {
+          const signalTotal = Number(row[scans[scanIndex]])
+          if (!signalTotal || signalTotal <= 0) continue
           const details = parseSignalDetails(row[scans[scanIndex] + 1])
-          for (let sigIndex = 0; sigIndex < count; sigIndex++) {
+          for (let sigIndex = 0; sigIndex < signalTotal; sigIndex++) {
             let name = `${type}`
-            if (count > 1) {
-              name += ` ${GREEK_LETTERS[sigIndex]}`
-            }
             let level = system.level
             if (sigIndex < details.levels.length) {
               level = details.levels[sigIndex]
@@ -120,16 +126,52 @@ function parseData(data: string[][]) {
               rarity = details.rarities[sigIndex]
             }
             const signal: Signal = {
+              id: '',
               name: name,
+              suffix: '',
               type: type,
               scan: scanIndex + 1,
               level: level,
+              tier: system.tier,
               rarity: rarity,
+              systemName: system.name,
             }
             system.signals.push(signal)
           }
         }
       }
+
+      const nameCounts = new Map<string, number>()
+      for (let signal of system.signals) {
+        if (!nameCounts.has(signal.name)) {
+          nameCounts.set(signal.name, 1)
+        } else {
+          const count = nameCounts.get(signal.name)
+          if (count) {
+            nameCounts.set(signal.name, count + 1)
+          }
+        }
+      }
+      const curNameCounts = new Map<string, number>()
+      for (let signal of system.signals) {
+        const total = nameCounts.get(signal.name)
+        if (total && total > 1) {
+          if (!curNameCounts.has(signal.name)) {
+            curNameCounts.set(signal.name, 1)
+          } else {
+            const count = curNameCounts.get(signal.name)
+            if (count) {
+              curNameCounts.set(signal.name, count + 1)
+            }
+          }
+          signal.suffix = `${GREEK_LETTERS[(curNameCounts.get(signal.name) as number) - 1]}`
+        }
+      }
+
+      for (let signal of system.signals) {
+        signal.id = `${signal.systemName}-${signal.name} ${signal.suffix}`
+      }
+
       for (let asteroidIndex of COL_ASTEROIDS) {
         if (row[asteroidIndex] !== '') {
           let asteroidStrings = String(row[asteroidIndex]).split(',')
@@ -143,7 +185,6 @@ function parseData(data: string[][]) {
             system.asteroids.push(asteroid)
           }
         }
-        systems.set(system.name, system)
       }
       for (let bandIndices of COL_JOVIANS) {
         if (row[bandIndices[0]] !== '') {
@@ -310,4 +351,14 @@ export function getJovianBandsHTML(jovians: Jovian[], maxTier = 2) {
     }
   }
   return html
+}
+
+export function getSignals(data: Map<string, System>) {
+  const signals: Signal[] = []
+  for (let system of data.values()) {
+    for (let signal of system.signals) {
+      signals.push(signal)
+    }
+  }
+  return signals
 }

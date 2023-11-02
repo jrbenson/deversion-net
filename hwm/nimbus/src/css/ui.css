@@ -1,42 +1,10 @@
-:root {
-  --selected-color: #f06122;
-  --common-color: #123d9b;
-  --uncommon-color: #3979aa;
-  --epic-color: #7030a0;
-  --rare-color: #70ad47;
-  --legendary-color: #ad8329;
-}
-
-html {
-  overscroll-behavior: none;
-  font-family: 'PT Sans Narrow', sans-serif;
-  font-weight: 400;
-  font-size: 16px;
-  color: #ffffff;
-}
-
-body,
-html {
-  position: fixed;
-  width: 100%;
-  height: 100%;
-  padding: 0;
-  margin: 0;
-  background-color: #1e3162;
-}
-
-body {
-  background-image: url('../starfield.jpg');
-  background-size: cover;
-}
-
 #ui {
-  background-image: url('../texture-stripes.png');
+  background-image: url('../../texture-stripes.png');
   background-repeat: repeat;
 }
 
 #map,
-#list {
+.list {
   user-select: none;
 }
 
@@ -95,12 +63,50 @@ font-family: 'Jura', sans-serif; */
   display: flex;
   flex-flow: row nowrap;
   justify-content: space-between;
+  align-items: flex-start;
   background: linear-gradient(0deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.6) 100%);
+}
+
+#top h1 {
+  text-shadow: 0px 0px 2px #000000, 0px 0px 8px #000000;
+  margin: 0;
+  margin-right: 1rem;
+}
+
+.flow-row {
+  padding: 1rem 2rem;
+  display: inline-flex;
+  flex-flow: row wrap;
+  gap: 0.75rem;
 }
 
 .toolbar {
   padding: 1rem 2rem;
   pointer-events: all;
+  display: inline-flex;
+  flex-flow: row nowrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.flow-row .toolbar {
+  padding: 0;
+}
+
+.toolbar.left {
+  justify-content: flex-start;
+}
+
+.toolbar.right {
+  justify-content: flex-end;
+}
+
+@media (max-width: 470px) {
+  .toolbar.right {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
 }
 
 .subtle {
@@ -110,13 +116,13 @@ font-family: 'Jura', sans-serif; */
   font-size: smaller;
 }
 
-#list {
+.list {
   font-family: 'Jura', sans-serif;
   font-weight: 300;
   position: fixed;
   top: 4rem;
   right: 2rem;
-  height: calc(100vh - 4rem);
+  max-height: calc(100vh - 4rem);
   max-width: 320px;
   width: 100%;
   overflow-y: scroll;
@@ -124,32 +130,43 @@ font-family: 'Jura', sans-serif; */
   transition: right 0.4s ease-in-out;
 }
 
-#list.hidden {
+@media (max-width: 608px) {
+  .list {
+    top: 7rem;
+    max-height: calc(100vh - 7rem);
+  }
+}
+
+.list.hidden {
   right: -325px;
 }
 
-#list hr {
+.list hr {
   opacity: 0.15;
 }
 
-#list ul {
+.list ul {
   padding: 1px;
   margin: 0;
 }
 
-#list li {
+.list li {
   list-style: none;
   padding: 0;
   margin: 0;
   margin-bottom: 0.3rem;
-  background-color: #000000cc;
+  background-color: #000000ee;
 }
 
-#list li.selected {
+.list li.selected {
   outline: 1px solid var(--selected-color);
 }
 
-#list .header {
+.list li.hidden {
+  display: none;
+}
+
+.list .header {
   font-family: 'Jura', sans-serif;
   font-weight: 500;
   text-transform: uppercase;
@@ -159,36 +176,43 @@ font-family: 'Jura', sans-serif; */
   justify-content: space-between;
 }
 
-#list .signals {
+#signal-list .header {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.25rem 0.25rem 0.75rem;
+}
+
+.list .signals {
   display: flex;
   flex-flow: column nowrap;
   gap: 0.2rem;
 }
 
-#list .sig-header {
+.list .sig-header {
   display: flex;
   flex-flow: row nowrap;
   gap: 0.5rem;
   align-items: center;
 }
 
-#list .details {
+.list .details {
+  color: var(--alt-text-color);
   padding: 0rem 0.5rem 0.5rem 1rem;
   display: none;
 }
 
-#list .name,
-#list .summary {
+.list .name,
+.list .summary {
   display: inline-flex;
   align-items: center;
   gap: 0.2rem;
 }
 
-#list .header .icon {
+.list .header .icon {
   width: 0.9rem;
 }
 
-#list .header .tier-wrapper {
+.list .header .tier-wrapper {
+  color: var(--alt-text-color);
   display: inline-flex;
   flex-flow: row nowrap;
   padding: 0.1rem;
@@ -197,7 +221,7 @@ font-family: 'Jura', sans-serif; */
   width: 2.2rem; */
 }
 
-#list .tier {
+.list .tier {
   font-family: 'PT Sans Narrow', sans-serif;
   font-size: 0.9rem;
   display: inline-block;
@@ -207,7 +231,7 @@ font-family: 'Jura', sans-serif; */
   aspect-ratio: 1 / 1;
 }
 
-#list .level {
+.list .level {
   font-family: 'PT Sans Narrow', sans-serif;
   font-size: 0.9rem;
   display: inline-block;
@@ -219,37 +243,42 @@ font-family: 'Jura', sans-serif; */
   aspect-ratio: 1 / 1;
 }
 
-#list .signal .level {
+.list .signal .level {
   font-size: 0.75rem;
   height: 1rem;
 }
 
-#list .level.common,
-#list .tier.common {
+.list .level.common,
+.list .tier.common,
+.list .tier-wrapper.common {
   background-color: var(--common-color);
 }
 
-#list level.uncommon,
-#list .tier.uncommon {
+.list .level.uncommon,
+.list .tier.uncommon,
+.list .tier-wrapper.uncommon {
   background-color: var(--uncommon-color);
 }
 
-#list .level.rare,
-#list .tier.rare {
+.list .level.rare,
+.list .tier.rare,
+.list .tier-wrapper.rare {
   background-color: var(--rare-color);
 }
 
-#list .level.epic,
-#list .tier.epic {
+.list .level.epic,
+.list .tier.epic,
+.list .tier-wrapper.epic {
   background-color: var(--epic-color);
 }
 
-#list .level.legendary,
-#list .tier.legendary {
+.list .level.legendary,
+.list .tier.legendary,
+.list .tier-wrapper.legendary {
   background-color: var(--legendary-color);
 }
 
-#list .detail-row {
+.list .detail-row {
   display: flex;
   justify-content: flex-start;
   align-items: center;
@@ -257,18 +286,60 @@ font-family: 'Jura', sans-serif; */
   padding: 0.2rem 0rem;
 }
 
-#list .icon {
+.list .icon {
   display: inline-block;
   width: 1.2rem;
   height: 1.2rem;
   aspect-ratio: 1 / 1;
 }
 
-#btn-list {
-  fill: #ffffff;
+.btn {
+  fill: var(--primary-text-color);
   cursor: pointer;
 }
 
-#btn-list:hover {
+.btn.selected {
   fill: var(--selected-color);
+}
+
+.btn:hover {
+  fill: var(--alt-text-color);
+}
+
+input,
+select {
+  font-family: 'PT Sans Narrow', sans-serif;
+  border-radius: 0;
+  border: none;
+  border-bottom: 1px solid var(--primary-text-color);
+  text-transform: capitalize;
+  color: var(--primary-text-color);
+  background: #000000dd;
+  cursor: pointer;
+}
+
+input:hover,
+select:hover {
+  color: var(--alt-text-color);
+  border-color: var(--alt-text-color);
+}
+
+input[type='reset'] {
+  border: none;
+  background: var(--primary-text-color);
+  color: var(--contrast-text-color);
+  padding: 0.1rem 0.25rem;
+  margin: 0.15rem;
+}
+
+input[type='reset']:hover {
+  background: var(--alt-text-color);
+  color: var(--contrast-text-color);
+}
+
+input {
+  padding: 0.2rem 0.4rem;
+}
+select {
+  padding: 0.2rem 0.2rem;
 }

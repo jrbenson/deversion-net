@@ -2,10 +2,10 @@ import createPanZoom, { PanZoom } from 'panzoom'
 import { System } from './system'
 import { getJovianBandsHTML, getOresInAsteroids } from './data'
 import { newSVG } from './svg'
+import { getFilteredSystems } from './filtering'
 
 import { numberToRomanNumeral } from './utils'
 
-import mapSVG from '../map.svg'
 import iconJovian from '../ico-jovian.svg'
 import iconMining from '../ico-mining.svg'
 import iconStation from '../ico-station.svg'
@@ -18,7 +18,7 @@ export class StarChart {
 
   _events: Map<string, Function[]> = new Map()
 
-  constructor(element: HTMLElement, data: Map<string, System>) {
+  constructor(element: HTMLElement, svgText: string, data: Map<string, System>) {
     this.element = element
 
     this.panzoom = createPanZoom(this.element, {
@@ -32,42 +32,40 @@ export class StarChart {
       },
     })
 
-    const listElem = document.querySelector('#list') as HTMLElement
-    listElem.addEventListener('mouseover', () => {
-      this.panzoom.pause()
-    })
-    listElem.addEventListener('mouseout', () => {
-      this.panzoom.resume()
-    })
-    // listElem.addEventListener('mousewheel', () => {
-    //   this.panzoom.pause()
-    // })
-    listElem.addEventListener('touchstart', () => {
-      this.panzoom.pause()
-    })
-    listElem.addEventListener('touchend', () => {
-      this.panzoom.resume()
-    })
-
-    window.fetch(mapSVG).then((res) => {
-      res.text().then((text) => {
-        this.element.innerHTML = text
-
-        const svg = this.element.querySelector('svg') as SVGSVGElement
-        let y = window.innerHeight / 2 - svg.clientHeight / 2
-
-        this.panzoom.moveTo(0, y)
-
-        this.update(data)
-        this.handleZoom()
-        this.panzoom.on('zoom', (e) => {
-          this.handleZoom()
-        })
-        window.onresize = () => {
-          this.handleZoom()
-        }
+    const listElems = document.querySelectorAll('.list').forEach((elem) => {
+      const listElem = elem as HTMLElement
+      listElem.addEventListener('mouseover', () => {
+        this.panzoom.pause()
+      })
+      listElem.addEventListener('mouseout', () => {
+        this.panzoom.resume()
+      })
+      // listElem.addEventListener('mousewheel', () => {
+      //   this.panzoom.pause()
+      // })
+      listElem.addEventListener('touchstart', () => {
+        this.panzoom.pause()
+      })
+      listElem.addEventListener('touchend', () => {
+        this.panzoom.resume()
       })
     })
+
+    this.element.innerHTML = svgText
+
+    const svg = this.element.querySelector('svg') as SVGSVGElement
+    let y = window.innerHeight / 2 - svg.clientHeight / 2
+
+    this.panzoom.moveTo(0, y)
+
+    this.update(data)
+    this.handleZoom()
+    this.panzoom.on('zoom', (e) => {
+      this.handleZoom()
+    })
+    window.onresize = () => {
+      this.handleZoom()
+    }
   }
 
   on(event: string, callback: Function) {
@@ -155,7 +153,7 @@ export class StarChart {
         this.stars.get(id)?.moveToFront()
         const selectedStar = this.stars.get(id)
         if (selectedStar && !userAction) {
-          const list = document.querySelector('#list') as HTMLElement
+          const list = document.querySelector('#system-list') as HTMLElement
           const listWidth = list.clientWidth
 
           const curTransform = this.panzoom.getTransform()
@@ -189,6 +187,22 @@ export class StarChart {
         })
       }
     }
+  }
+
+  setFiltered(filters: Map<string, string>, data: Map<string, System>) {
+    const keepIds = getFilteredSystems(data, filters).map((system) => {
+      return system.name
+    })
+    this.element.querySelectorAll('#map .container').forEach((cont) => {
+      const contElem = cont as HTMLDivElement
+      const gElem = cont.closest('g') as SVGGElement
+      const id = contElem.dataset.id
+      if (id && keepIds.includes(id)) {
+        gElem.style.display = 'unset'
+      } else {
+        gElem.style.display = 'none'
+      }
+    })
   }
 }
 

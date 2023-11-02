@@ -1,3 +1,7 @@
+#map {
+  color: var(--alt-text-color);
+}
+
 #map .name {
   font-size: 1rem;
   text-transform: uppercase;
@@ -93,6 +97,10 @@
   transition: all 0.4s ease-in-out;
   gap: 0.05rem;
   pointer-events: none;
+}
+
+#map .hidden {
+  display: none;
 }
 
 #map .container.lod-2:not(.selected) {

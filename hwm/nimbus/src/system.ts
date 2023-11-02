@@ -6,10 +6,14 @@ export interface EnemyShip {
 }
 
 export interface Signal {
+  id: string
   name: string
+  suffix: string
   type: string
   scan: number
+  tier: number
   level: number
+  systemName: string
   rarity: string
   enemy?: string
   ally?: string

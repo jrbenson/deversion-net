@@ -15,10 +15,60 @@
     <div id="map"></div>
     <div id="ui">
       <div id="top">
-        <span class="toolbar">(filters)</span>
-        <h1>Nimbus</h1>
-        <span class="toolbar">
-          <a id="btn-list"
+        <span class="flow-row">
+          <h1>Nimbus</h1>
+          <form class="toolbar left">
+            <select name="tier" id="filter-tier">
+              <option value="" disabled selected>Tier</option>
+              <option value="0">0</option>
+              <option value="1">I</option>
+              <option value="2">II</option>
+              <option value="3">III</option>
+              <option value="4">IV</option>
+            </select>
+            <select name="level" id="filter-level">
+              <option value="" disabled selected>Lvl</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+              <option value="9">9</option>
+            </select>
+            <select name="rarity" id="filter-rarity">
+              <option value="" disabled selected>Rarity</option>
+              <option value="common">Common</option>
+              <option value="rare">Rare</option>
+              <option value="epic">Epic</option>
+            </select>
+            <select name="type" id="filter-type" style="display: none">
+              <option value="" disabled selected>Type</option>
+              <option value="combat">Combat</option>
+              <option value="relic">Relic</option>
+              <option value="activities">Activities</option>
+              <option value="mining">Mining</option>
+              <option value="trader">Trader</option>
+            </select>
+            <select name="scan" id="filter-scan">
+              <option value="" disabled selected>Scan</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+            </select>
+            <input type="reset" value="╳" id="filter-reset" />
+          </form>
+        </span>
+        <span class="toolbar right">
+          <a id="btn-signal-list" class="btn"
+            ><svg viewBox="0 0 32 32" width="32" height="32">
+              <path d="M9.7,13c1.1-2.4,3.5-4,6.3-4s5.2,1.6,6.3,4h5.3c-1.3-5.2-6-9-11.6-9S5.7,7.8,4.4,13H9.7z" />
+              <path d="M22.3,19c-1.1,2.4-3.5,4-6.3,4s-5.2-1.6-6.3-4H4.4c1.3,5.2,6,9,11.6,9s10.3-3.8,11.6-9H22.3z" />
+            </svg>
+          </a>
+          <a id="btn-system-list" class="btn selected"
             ><svg viewBox="0 0 32 32" width="32" height="32">
               <rect x="4" y="5" width="24" height="6" />
               <rect x="4" y="13" width="24" height="6" />
@@ -27,7 +77,8 @@
           </a>
         </span>
       </div>
-      <div id="list"></div>
+      <div id="system-list" class="list hidden"></div>
+      <div id="signal-list" class="list hidden">Signals</div>
     </div>
     <script type="module" src="src/index.ts"></script>
   </body>

@@ -1,13 +1,14 @@
-import { getOreLevelRangeHTML, getJovianBandsHTML } from './data'
-import { System } from './system'
+import { getSignals } from './data'
+import { Signal, System } from './system'
 import { numberToRomanNumeral } from './utils'
+import { getFilteredSignals } from './filtering'
 
 import iconJovian from '../ico-jovian.svg'
 import iconMining from '../ico-mining.svg'
 import iconStation from '../ico-station.svg'
 import iconBlank from '../ico-blank.svg'
 
-export class SystemList {
+export class SignalList {
   element: HTMLElement
 
   _events: Map<string, Function[]> = new Map()
@@ -16,8 +17,8 @@ export class SystemList {
     this.element = element
 
     let html = '<ul>'
-    for (let [name, system] of data) {
-      html += this.getListItemHTML(system)
+    for (let signal of getSignals(data)) {
+      html += this.getListItemHTML(signal)
     }
     html += '</ul>'
     this.element.innerHTML = html
@@ -29,6 +30,14 @@ export class SystemList {
         if (id) {
           this.setSelected(id)
         }
+      })
+    })
+
+    this.element.querySelectorAll('span.system-link').forEach((link) => {
+      link.addEventListener('click', (e) => {
+        const target = e.target as HTMLElement
+        const id = target.dataset.id
+        document.getElementById('btn-system-list')?.click()
       })
     })
   }
@@ -98,66 +107,46 @@ export class SystemList {
     }
   }
 
-  getListItemHTML(system: System) {
-    const stationIndicatorHTML = system.station
-      ? `<img class="icon" src="${iconStation}"/>`
-      : `<img class="icon" src="${iconBlank}"/>`
-    const asteroidIndicatorHTML =
-      system.asteroids.length > 0 ? `<img class="icon" src="${iconMining}"/>` : `<img class="icon" src="${iconBlank}"/>`
-    const jovianIndicatorHTML =
-      system.jovians.length > 0 ? `<img class="icon" src="${iconJovian}"/>` : `<img class="icon" src="${iconBlank}"/>`
+  getListItemHTML(signal: Signal) {
+    // const stationIndicatorHTML = system.station
+    //   ? `<img class="icon" src="${iconStation}"/>`
+    //   : `<img class="icon" src="${iconBlank}"/>`
+    // const asteroidIndicatorHTML =
+    //   system.asteroids.length > 0 ? `<img class="icon" src="${iconMining}"/>` : `<img class="icon" src="${iconBlank}"/>`
+    // const jovianIndicatorHTML =
+    //   system.jovians.length > 0 ? `<img class="icon" src="${iconJovian}"/>` : `<img class="icon" src="${iconBlank}"/>`
 
     let html = `
-      <li data-id="${system.name}">
+      <li data-id="${signal.id}">
         <div class="header">
-          <span class="name">${system.name}</span>
+          <span class="name">${signal.name} <span class="subtle">${signal.suffix}</span></span>
           <span class="summary">
-          ${asteroidIndicatorHTML}${jovianIndicatorHTML}${stationIndicatorHTML}
-            <span class="tier-wrapper">
-              <span class="tier">${numberToRomanNumeral(system.tier)}</span>
-              <span class="level">${system.level}</span>
+            <span class="type"></span>
+            <span class="tier-wrapper ${signal.rarity}">
+              <span class="tier">${numberToRomanNumeral(signal.tier)}</span>
+              <span class="level">${signal.level}</span>
             </span>
           </span>
         </div>
         <div class="details">
-          ${this.getAsteroidHTML(system)}
-          ${this.getJovianHTML(system)}
-          ${system.asteroids.length > 0 || system.jovians.length > 0 ? '<hr>' : ''}
-          <div class="signals">
-          ${this.getSignalHTML(system)}
-          </div>
+          <span class="system-link" data-id="${signal.systemName}">${signal.systemName}</span>
         </div>
       </li>
     `
     return html
   }
 
-  getAsteroidHTML(system: System) {
-    let html = ''
-    if (system.asteroids.length > 0) {
-      html += `<div class="detail-row"><img class="icon" src="${iconMining}"/>&nbsp;${getOreLevelRangeHTML(
-        system.asteroids
-      )}</div>`
-    }
-    return html
-  }
-
-  getSignalHTML(system: System) {
-    let html = ''
-    for (let signal of system.signals) {
-      html += `<div class="signal"><div class="sig-header"><span class="level ${signal.rarity}">${signal.level}</span>${signal.name}</div><div class="sig-details"></div></div>`
-    }
-    return html
-  }
-
-  getJovianHTML(system: System) {
-    let html = ''
-    if (system.jovians.length > 0) {
-      html += `<div class="detail-row"><img class="icon" src="${iconJovian}"/>&nbsp;${getJovianBandsHTML(
-        system.jovians,
-        3
-      )}</div>`
-    }
-    return html
+  setFiltered(filters: Map<string, string>, data: Map<string, System>) {
+    const keepIds = getFilteredSignals(data, filters).map((signal) => {
+      return signal.id
+    })
+    this.element.querySelectorAll('li').forEach((li) => {
+      const id = li.dataset.id
+      if (id && keepIds.includes(id)) {
+        li.classList.remove('hidden')
+      } else {
+        li.classList.add('hidden')
+      }
+    })
   }
 }
