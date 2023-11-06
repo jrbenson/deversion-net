@@ -177,7 +177,7 @@ font-family: 'Jura', sans-serif; */
 }
 
 #signal-list .header {
-  font-size: 0.75rem;
+  font-size: 0.9rem;
   padding: 0.25rem 0.25rem 0.25rem 0.75rem;
 }
 
@@ -205,6 +205,11 @@ font-family: 'Jura', sans-serif; */
   display: inline-flex;
   align-items: center;
   gap: 0.2rem;
+}
+
+.list .header:hover {
+  color: var(--alt-text-color);
+  cursor: pointer;
 }
 
 .list .header .icon {
