@@ -6,8 +6,6 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html'),
-        hwm: resolve(__dirname, 'hwm/index.html'),
-        hwm_nimbus: resolve(__dirname, 'hwm/nimbus/index.html'),
       },
     },
   },
